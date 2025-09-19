@@ -6,10 +6,11 @@ import pytest
 from elasticsearch import Elasticsearch
 
 from src.domain.category import Category
-from src.infra.elasticsearch.elasticsearch_category_repository import (
-    ELASTICSEARCH_HOST_TEST,
-    ElasticsearchCategoryRepository,
-)
+from src.infra.elasticsearch import ELASTICSEARCH_HOST_TEST
+from src.infra.elasticsearch.elasticsearch_category_repository import ElasticsearchCategoryRepository
+
+from src.domain.cast_member import CastMember
+from src.infra.elasticsearch.elasticsearch_cast_member_repository import ElasticsearchCastMemberRepository
 
 
 @pytest.fixture
@@ -18,9 +19,13 @@ def es() -> Generator[Elasticsearch, None, None]:
 
     if not client.indices.exists(index=ElasticsearchCategoryRepository.INDEX):
         client.indices.create(index=ElasticsearchCategoryRepository.INDEX)
+    if not client.indices.exists(index=ElasticsearchCastMemberRepository.INDEX):
+        client.indices.create(index=ElasticsearchCastMemberRepository.INDEX)
+
     yield client
 
     client.indices.delete(index=ElasticsearchCategoryRepository.INDEX)
+    client.indices.delete(index=ElasticsearchCastMemberRepository.INDEX)
 
 
 @pytest.fixture
@@ -57,6 +62,42 @@ def documentary() -> Category:
         updated_at=datetime.now(),
         is_active=True,
     )
+    
+
+@pytest.fixture
+def actor() -> CastMember:
+    return CastMember(
+        id=uuid4(),
+        name="Alf",
+        type='ACTOR',
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+        is_active=True,
+    )
+
+
+@pytest.fixture
+def director() -> CastMember:
+    return CastMember(
+        id=uuid4(),
+        name="Benny",
+        type='DIRECTOR',
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+        is_active=True,
+    )
+
+
+@pytest.fixture
+def director2() -> CastMember:
+    return CastMember(
+        id=uuid4(),
+        name="Doug",
+        type='DIRECTOR',
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+        is_active=True,
+    )
 
 
 @pytest.fixture
@@ -65,6 +106,9 @@ def populated_es(
     movie: Category,
     series: Category,
     documentary: Category,
+    actor: CastMember,
+    director: CastMember,
+    director2: CastMember,
 ) -> Elasticsearch:
     es.index(
         index=ElasticsearchCategoryRepository.INDEX,
@@ -82,6 +126,24 @@ def populated_es(
         index=ElasticsearchCategoryRepository.INDEX,
         id=str(documentary.id),
         body=documentary.model_dump(mode="json"),
+        refresh=True,
+    )
+    es.index(
+        index=ElasticsearchCastMemberRepository.INDEX,
+        id=str(actor.id),
+        body=actor.model_dump(mode="json"),
+        refresh=True,
+    )
+    es.index(
+        index=ElasticsearchCastMemberRepository.INDEX,
+        id=str(director.id),
+        body=director.model_dump(mode="json"),
+        refresh=True,
+    )
+    es.index(
+        index=ElasticsearchCastMemberRepository.INDEX,
+        id=str(director2.id),
+        body=director2.model_dump(mode="json"),
         refresh=True,
     )
 

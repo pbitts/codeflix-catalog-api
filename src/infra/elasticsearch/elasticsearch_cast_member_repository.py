@@ -1,20 +1,17 @@
 import logging
-import os
 
 from elasticsearch import Elasticsearch
 from pydantic import ValidationError
 
-from src.application.list_category import CategorySortableFields
+from src.application.list_cast_member import CastMemberSortableFields
 from src.application.listing import DEFAULT_PAGINATION_SIZE, SortDirection
-from src.domain.category import Category
-from src.domain.category_repository import (
-    CategoryRepository,
-)
+from src.domain.cast_member import CastMember
+from src.domain.cast_member_repository import CastMemberRepository
 from src.infra.elasticsearch import ELASTICSEARCH_HOST
 
 
-class ElasticsearchCategoryRepository(CategoryRepository):
-    INDEX = "catalog-db.codeflix.categories"
+class ElasticsearchCastMemberRepository(CastMemberRepository):
+    INDEX = "catalog-db.codeflix.cast_members"
 
     def __init__(
         self,
@@ -29,12 +26,9 @@ class ElasticsearchCategoryRepository(CategoryRepository):
         page: int = 1,
         per_page: int = DEFAULT_PAGINATION_SIZE,
         search: str | None = None,
-        sort: CategorySortableFields | None = None,
+        sort: CastMemberSortableFields | None = None,
         direction: SortDirection = SortDirection.ASC,
-    ) -> list[Category]:
-        # Se quiséssemos o total de resultados, poderíamos usar o campo "total" do response
-        # total_count = response["hits"]["total"]["value"]
-        # pode ser utilizado pra calcular a "next_page" por exemplo.
+    ) -> list[CastMember]:
         query = {
             "from": (page - 1) * per_page,
             "size": per_page,
@@ -42,7 +36,7 @@ class ElasticsearchCategoryRepository(CategoryRepository):
             "query": {
                 "bool": {
                     "must": (
-                        [{"multi_match": {"query": search, "fields": ["name", "description"]}}]
+                        [{"multi_match": {"query": search, "fields": ["name", "type"]}}]
                         if search
                         else [{"match_all": {}}]
                     )
@@ -50,19 +44,18 @@ class ElasticsearchCategoryRepository(CategoryRepository):
             },
         }
 
-        response = self._client.search(
+        hits = self._client.search(
             index=self.INDEX,
             body=query,
-        )
-        category_hits = response["hits"]["hits"]
+        )["hits"]["hits"]
 
-        parsed_categories = []
-        for category in category_hits:
+        parsed_entities = []
+        for hit in hits:
             try:
-                parsed_category = Category(**category["_source"])
+                parsed_entity = CastMember(**hit["_source"])
             except ValidationError:
-                self._logger.error(f"Malformed category: {category}")
+                self._logger.error(f"Malformed entity: {hit}")
             else:
-                parsed_categories.append(parsed_category)
+                parsed_entities.append(parsed_entity)
 
-        return parsed_categories
+        return parsed_entities
