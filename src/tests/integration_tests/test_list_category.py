@@ -9,10 +9,9 @@ from src.application.list_category import CategorySortableFields, ListCategory, 
 from src.application.listing import ListOutputMeta
 from src.domain.category import Category
 from src.domain.repository import SortDirection
-from src.infra.elasticsearch.elasticsearch_category_repository import (
-    ElasticsearchCategoryRepository,
-    ELASTICSEARCH_HOST_TEST,
-)
+from src.infra.elasticsearch import ELASTICSEARCH_HOST_TEST
+from src.infra.elasticsearch.elasticsearch_category_repository import ElasticsearchCategoryRepository
+
 
 
 @pytest.fixture
