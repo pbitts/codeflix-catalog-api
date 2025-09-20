@@ -5,12 +5,13 @@ from uuid import uuid4
 import pytest
 from elasticsearch import Elasticsearch
 
+from src.domain.genre import Genre
+from src.domain.cast_member import CastMember
 from src.domain.category import Category
 from src.infra.elasticsearch import ELASTICSEARCH_HOST_TEST
-from src.infra.elasticsearch.elasticsearch_category_repository import ElasticsearchCategoryRepository
-
-from src.domain.cast_member import CastMember
+from src.infra.elasticsearch.elasticsearch_genre_repository import ElasticsearchGenreRepository
 from src.infra.elasticsearch.elasticsearch_cast_member_repository import ElasticsearchCastMemberRepository
+from src.infra.elasticsearch.elasticsearch_category_repository import ElasticsearchCategoryRepository
 
 
 @pytest.fixture
@@ -21,9 +22,12 @@ def es() -> Generator[Elasticsearch, None, None]:
         client.indices.create(index=ElasticsearchCategoryRepository.INDEX)
     if not client.indices.exists(index=ElasticsearchCastMemberRepository.INDEX):
         client.indices.create(index=ElasticsearchCastMemberRepository.INDEX)
+     if not client.indices.exists(index=ElasticsearchGenreRepository.INDEX):
+        client.indices.create(index=ElasticsearchGenreRepository.INDEX)
 
     yield client
 
+    client.indices.delete(index=ElasticsearchGenreRepository.INDEX)
     client.indices.delete(index=ElasticsearchCategoryRepository.INDEX)
     client.indices.delete(index=ElasticsearchCastMemberRepository.INDEX)
 
@@ -99,6 +103,29 @@ def director2() -> CastMember:
         is_active=True,
     )
 
+@pytest.fixture
+def drama(movie: Category, documentary: Category) -> Genre:
+    return Genre(
+        id=uuid4(),
+        name="Drama",
+        categories={movie.id, documentary.id},
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+        is_active=True,
+    )
+
+
+@pytest.fixture
+def romance() -> Genre:
+    return Genre(
+        id=uuid4(),
+        name="Romance",
+        categories=set(),
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+        is_active=True,
+    )
+
 
 @pytest.fixture
 def populated_es(
@@ -109,6 +136,8 @@ def populated_es(
     actor: CastMember,
     director: CastMember,
     director2: CastMember,
+    drama: Genre,
+    romance: Genre,
 ) -> Elasticsearch:
     es.index(
         index=ElasticsearchCategoryRepository.INDEX,
@@ -144,6 +173,40 @@ def populated_es(
         index=ElasticsearchCastMemberRepository.INDEX,
         id=str(director2.id),
         body=director2.model_dump(mode="json"),
+        refresh=True,
+    )
+    
+     # Genre
+    es.index(
+        index=ElasticsearchGenreRepository.INDEX,
+        id=str(drama.id),
+        body=drama.model_dump(mode="json"),
+        refresh=True,
+    )
+    es.index(
+        index=ElasticsearchGenreRepository.INDEX,
+        id=str(romance.id),
+        body=romance.model_dump(mode="json"),
+        refresh=True,
+    )
+
+    # Drama categories
+    es.index(
+        index=ElasticsearchGenreRepository._GENRE_CATEGORIES_INDEX,
+        id=str(uuid4()),
+        body={
+            "genre_id": str(drama.id),
+            "category_id": str(movie.id),
+        },
+        refresh=True,
+    )
+    es.index(
+        index=ElasticsearchGenreRepository._GENRE_CATEGORIES_INDEX,
+        id=str(uuid4()),
+        body={
+            "genre_id": str(drama.id),
+            "category_id": str(documentary.id),
+        },
         refresh=True,
     )
 
