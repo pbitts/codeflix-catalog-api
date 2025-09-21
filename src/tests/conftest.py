@@ -22,7 +22,7 @@ def es() -> Generator[Elasticsearch, None, None]:
         client.indices.create(index=ElasticsearchCategoryRepository.INDEX)
     if not client.indices.exists(index=ElasticsearchCastMemberRepository.INDEX):
         client.indices.create(index=ElasticsearchCastMemberRepository.INDEX)
-     if not client.indices.exists(index=ElasticsearchGenreRepository.INDEX):
+    if not client.indices.exists(index=ElasticsearchGenreRepository.INDEX):
         client.indices.create(index=ElasticsearchGenreRepository.INDEX)
 
     yield client
