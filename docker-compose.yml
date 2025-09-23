@@ -80,6 +80,7 @@ services:
   connect-setup:
     container_name: connect-setup
     image: curlimages/curl
+    user: root
     volumes:
       - ./kafka-connect/bin:/kafka-connect/bin
     depends_on:
