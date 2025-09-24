@@ -5,6 +5,7 @@ from fastapi import Depends, Query, APIRouter
 from src.application.list_cast_member import CastMemberSortableFields, ListCastMember, ListCastMemberInput
 from src.application.listing import ListOutput
 from src.domain.cast_member import CastMember
+from src.infra.api.http.auth import authenticate
 from src.domain.cast_member_repository import CastMemberRepository
 from src.infra.api.http.dependencies import common_parameters, get_cast_member_repository
 from src.infra.elasticsearch.elasticsearch_cast_member_repository import ElasticsearchCastMemberRepository
@@ -17,6 +18,7 @@ def list_cast_members(
     repository: CastMemberRepository = Depends(get_cast_member_repository),
     sort: CastMemberSortableFields = Query(CastMemberSortableFields.NAME, description="Field to sort by"),
     common: dict[str, Any] = Depends(common_parameters),
+    auth: None = Depends(authenticate),
 ) -> ListOutput[CastMember]:
     return ListCastMember(repository=repository).execute(
         ListCastMemberInput(

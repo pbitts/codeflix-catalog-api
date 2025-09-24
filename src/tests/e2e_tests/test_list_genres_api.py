@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from src.domain.genre import Genre
 from src.domain.genre_repository import GenreRepository
+from src.infra.api.http.auth import authenticate
 from src.infra.api.http.main import app
 from src.infra.api.http.dependencies import get_genre_repository
 from src.infra.elasticsearch.elasticsearch_genre_repository import (
@@ -25,6 +26,7 @@ def test_client_with_populated_repo(
     populated_genre_repository: GenreRepository,
 ) -> Iterator[TestClient]:
     app.dependency_overrides[get_genre_repository] = lambda: populated_genre_repository
+    app.dependency_overrides[authenticate] = lambda: None
     yield TestClient(app)
     app.dependency_overrides.clear()
 
