@@ -4,7 +4,7 @@ import pytest
 from pytest_mock import MockFixture
 from confluent_kafka import KafkaException, Consumer as KafkaConsumer, Message
 
-from src.domain.category.category import Category
+from src.domain.category import Category
 from src.infra.kafka.consumer import Consumer
 
 # from src.infra.kafka.abstract_kafka_client import AbstractKafkaClient

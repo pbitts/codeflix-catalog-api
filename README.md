@@ -30,14 +30,14 @@ It:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/codeflix-catalog-api.git
+git clone https://github.com/pbitts/codeflix-catalog-api.git
 cd codeflix-catalog-api
 ```
 
 ### 2. Start all services with Docker Compose
 
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 This will spin up:
@@ -61,7 +61,7 @@ This will spin up:
 ### 4. Running Tests
 
 ```bash
-docker-compose --profile test up --build
+docker compose --profile test up --build
 ```
 
 This spins up a **test environment** with a dedicated ElasticSearch instance and runs the test suite with **pytest**.
