@@ -13,7 +13,7 @@ type CastMember {
 type Genre {
     id: ID!
     name: String!
-    categories: [ID!]!
+    categories: [ID!]
 }
 
 type Meta {

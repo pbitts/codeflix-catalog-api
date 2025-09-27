@@ -1,3 +1,4 @@
+from typing import List
 import strawberry
 from strawberry.fastapi import GraphQLRouter
 from strawberry.schema.config import StrawberryConfig
@@ -35,7 +36,7 @@ class CastMemberGraphQL:
 class GenreGraphQL:
     id: strawberry.auto
     name: strawberry.auto
-    categories: strawberry.auto
+    categories: List[strawberry.ID]
 
 
 @strawberry.experimental.pydantic.type(model=ListOutputMeta, all_fields=True)

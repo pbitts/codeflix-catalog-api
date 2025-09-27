@@ -1,6 +1,6 @@
 from pytest_mock import MockFixture
 
-from src.infra.kafka.consumer import Category
+from src.domain.category import Category
 from src.infra.kafka.parser import ParsedEvent, parse_debezium_message
 from src.infra.kafka.operation import Operation
 
